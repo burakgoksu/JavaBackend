@@ -6,6 +6,9 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -91,7 +94,17 @@ public class CategoriesController {
 		return this.categoryService.getByCategoryNameAndProduct(categoryName);
 	}
 	
-
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorDataResult<Object> handleValidationException(MethodArgumentNotValidException exception){
+		Map<String,String> valitadionErrors = new HashMap<String, String>();
+		for(FieldError fieldError :  exception.getBindingResult().getFieldErrors()) {
+			valitadionErrors.put(fieldError.getField(), fieldError.getDefaultMessage());
+		}
+		
+		ErrorDataResult<Object> errors = new ErrorDataResult<Object>(valitadionErrors,"validation errors ");
+		return errors;
+	}
 	
 	
 	
